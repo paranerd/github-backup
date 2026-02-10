@@ -2,6 +2,19 @@
 
 # --- GitHub Backup Script ---
 
+# For use with e.g. LaunchAgent
+#export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+
+# For use without 'gh auth login'
+#export GH_TOKEN='github_pat_ADD_YOUR_TOKEN'
+
+ACCESS_LOG=/tmp/github_backup_access.log
+ERROR_LOG=/tmp/github_backup_error.log  
+
+# Empty logs
+cat /dev/null > $ACCESS_LOG
+cat /dev/null > $ERROR_LOG
+
 # Check if target path is provided
 if [ -z "$1" ]; then
     echo "Missing target path"
