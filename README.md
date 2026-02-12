@@ -5,6 +5,14 @@ Backup all GitHub repositories using gh
 ## Prerequisites
 
 - Have `gh` installed
+- When using SSH you may have to add the following to your `~/.ssh/config`:
+
+    ```bash
+    Host github.com
+        Hostname ssh.github.com
+        Port 443
+        User git
+    ```
 
 ## How to use with MacOS LaunchAgent
 
