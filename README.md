@@ -51,7 +51,7 @@ Backup all GitHub repositories using gh
 
 ### SSH access for cloning
 
-Repositories are cloned and pulled via **SSH** (`sshUrl`), independently of the API authentication above. Therefore:
+Repositories are mirrored (`git clone --mirror`) via **SSH** (`sshUrl`), independently of the API authentication above. Therefore:
 
 1. An SSH key must exist and be added to your GitHub account
 

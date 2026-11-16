@@ -34,6 +34,7 @@ fi
 TARGET_DIR=$(mkdir -p "$1" && cd "$1" && pwd)
 COUNT_NEW=0
 COUNT_UPDATED=0
+COUNT_FAILED=0
 STATE_FILE="$TARGET_DIR/.last_sync"
 BACKUP_STARTED=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
@@ -44,7 +45,7 @@ else
     LAST_SYNC="1970-01-01T00:00:00Z"
 fi
 
-echo "📦 Fetching own repositories for user \"$GITHUB_USER\" updated after \"$BACKUP_STARTED\"..."
+echo "📦 Fetching own repositories for user \"$GITHUB_USER\" updated after \"$LAST_SYNC\"..."
 
 # Fetch only non-forked repos updated since LAST_SYNC
 REPOS=$(gh repo list --limit 1000 --json sshUrl,isFork,pushedAt --jq ".[] | select(.isFork == false and .pushedAt > \"${LAST_SYNC}\") | .sshUrl" | sort -f)
@@ -62,7 +63,8 @@ for URL in $REPOS; do
     ((CURRENT_INDEX++))
     echo
     REPO_NAME=$(basename "$URL" .git)
-    FULL_PATH="$TARGET_DIR/$REPO_NAME"
+    # Bare mirror clone: all branches, tags and refs, no working copy
+    FULL_PATH="$TARGET_DIR/$REPO_NAME.git"
 
     printf "[%${#TOTAL_REPOS}d/%d]" "$CURRENT_INDEX" "$TOTAL_REPOS"
     echo
@@ -70,29 +72,45 @@ for URL in $REPOS; do
     if [ -d "$FULL_PATH" ]; then
         echo "🔄 Update: $REPO_NAME"
         # git -C runs the command in the target directory
-        if git -C "$FULL_PATH" pull; then
+        # remote update mirrors all refs 1:1 (force-pushes included), --prune removes deleted refs
+        if git -C "$FULL_PATH" remote update --prune; then
             ((COUNT_UPDATED++))
         else
+            ((COUNT_FAILED++))
             echo "⚠️  WARNING: Update failed for $REPO_NAME."
         fi
     else
         echo "⬇️  Clone: $REPO_NAME"
-        if git clone "$URL" "$FULL_PATH"; then
+        if git clone --mirror "$URL" "$FULL_PATH"; then
             ((COUNT_NEW++))
         else
+            ((COUNT_FAILED++))
             echo "⚠️  WARNING: Clone failed for $REPO_NAME."
         fi
     fi
 done
 
-# Update timestamp
-echo $BACKUP_STARTED > "$STATE_FILE"
+# Update timestamp only if all repositories were synced successfully,
+# otherwise failed repositories would be skipped until their next push
+if [ "$COUNT_FAILED" -eq 0 ]; then
+    echo "$BACKUP_STARTED" > "$STATE_FILE"
+fi
 
 # Print summary
 echo
 echo "---------------------------------------"
-echo "✅ Sync complete!"
+if [ "$COUNT_FAILED" -eq 0 ]; then
+    echo "✅ Sync complete!"
+else
+    echo "⚠️  Sync finished with errors"
+fi
 echo "⬇️  Cloned:           $COUNT_NEW"
 echo "🔄 Updated:          $COUNT_UPDATED"
+echo "❌ Failed:           $COUNT_FAILED"
 echo "📁 Target directory: $TARGET_DIR"
 echo "---------------------------------------"
+
+if [ "$COUNT_FAILED" -gt 0 ]; then
+    echo "⚠️  $COUNT_FAILED repositories failed. Timestamp not updated, they will be retried on the next run."
+    exit 1
+fi
