@@ -70,9 +70,9 @@ Repositories are cloned and pulled via **SSH** (`sshUrl`), independently of the 
 
     ```bash
     Host github.com
-        AddKeysToAgent yes
-        UseKeychain yes
-        IdentityFile ~/.ssh/id_ed25519
+      Hostname ssh.github.com
+      Port 443
+      User git
     ```
 
 1. If port 22 is blocked in your network, connect via port 443 by adding to the same `Host github.com` block
