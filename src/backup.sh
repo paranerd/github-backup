@@ -8,6 +8,9 @@
 # For use without 'gh auth login'
 #export GH_TOKEN='github_pat_ADD_YOUR_TOKEN'
 
+# Default target path (used if no path is passed as argument)
+#TARGET_PATH="$HOME/Backups/github"
+
 ACCESS_LOG=/tmp/github_backup_access.log
 ERROR_LOG=/tmp/github_backup_error.log  
 
@@ -15,10 +18,14 @@ ERROR_LOG=/tmp/github_backup_error.log
 cat /dev/null > $ACCESS_LOG
 cat /dev/null > $ERROR_LOG
 
+# Target path: argument takes precedence over TARGET_PATH set above
+TARGET_PATH="${1:-$TARGET_PATH}"
+
 # Check if target path is provided
-if [ -z "$1" ]; then
+if [ -z "$TARGET_PATH" ]; then
     echo "Missing target path"
     echo "Usage: $0 /your/target/path"
+    echo "Alternatively set TARGET_PATH in $0"
     exit 1
 fi
 
@@ -31,7 +38,7 @@ if [ -z "$GITHUB_USER" ]; then
 fi
 
 # Resolve absolute target directory (creates it if it doesn't exist)
-TARGET_DIR=$(mkdir -p "$1" && cd "$1" && pwd)
+TARGET_DIR=$(mkdir -p "$TARGET_PATH" && cd "$TARGET_PATH" && pwd)
 COUNT_NEW=0
 COUNT_UPDATED=0
 COUNT_FAILED=0

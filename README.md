@@ -102,6 +102,8 @@ Repositories are mirrored (`git clone --mirror`) via **SSH** (`sshUrl`), indepen
 
 1. Update the `ProgramArguments` in `src/com.user.github_backup.plist` to your setup
 
+    The target path argument is optional if `TARGET_PATH` is set in `backup.sh`. In that case remove the third `<string>` entry.
+
 1. Copy the `.plist` file
 
     ```bash
