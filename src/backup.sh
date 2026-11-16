@@ -18,7 +18,7 @@ cat /dev/null > $ERROR_LOG
 # Check if target path is provided
 if [ -z "$1" ]; then
     echo "Missing target path"
-    echo "Usage: $0 /your/target/path
+    echo "Usage: $0 /your/target/path"
     exit 1
 fi
 
