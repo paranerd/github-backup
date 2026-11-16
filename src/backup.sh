@@ -37,8 +37,18 @@ if [ -z "$GITHUB_USER" ]; then
     exit 1
 fi
 
-# Resolve absolute target directory (creates it if it doesn't exist)
-TARGET_DIR=$(mkdir -p "$TARGET_PATH" && cd "$TARGET_PATH" && pwd)
+# Resolve absolute target directory (must already exist)
+if [ ! -d "$TARGET_PATH" ]; then
+    echo "Error: Target directory \"$TARGET_PATH\" does not exist."
+    exit 1
+fi
+
+TARGET_DIR=$(cd "$TARGET_PATH" && pwd)
+
+if [ -z "$TARGET_DIR" ]; then
+    echo "Error: Target directory \"$TARGET_PATH\" is not accessible."
+    exit 1
+fi
 COUNT_NEW=0
 COUNT_UPDATED=0
 COUNT_FAILED=0

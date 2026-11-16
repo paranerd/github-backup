@@ -25,7 +25,7 @@ Backup all GitHub repositories using gh
     gh --version
     ```
 
-- Standard tools `date`, `sort`, `wc`, `xargs`, `basename` and `mkdir` (preinstalled on macOS and Linux)
+- Standard tools `date`, `sort`, `wc`, `xargs` and `basename` (preinstalled on macOS and Linux)
 
 ### GitHub API authentication
 
